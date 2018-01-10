@@ -1,0 +1,176 @@
+
+
+body{
+  background:black;
+  font-family: 'Lato', sans-serif;
+  font-size: 16px;
+  color:#f9fafa;
+}
+
+.search {
+  width: 100%;
+  position: relative;
+  display: inline-block;
+}
+
+.searchTerm {
+  float: left;
+  width: 100%;
+  border: 2px solid #3ecb7f;
+  padding: 5px;
+  height: 40px;
+  border-radius: 4px;
+  outline: none;
+  color: #3ecb7f;
+}
+
+.searchTerm:focus{
+  color: #3ecb7f;
+}
+
+.searchButton {
+  position: absolute;
+  right: -50px;
+  width: 80px;
+  height: 40px;
+  border: 1px solid #3ecb7f;
+  background: #3ecb7f;
+  text-align: center;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+#success{
+  color: #00db7e
+}
+/*Resize the wrap to see the search bar change!*/
+/*.wrap{
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}*/
+
+.mt-15 {
+  margin-top: 15px; }
+
+.mt-20 {
+  margin-top: 20px; }
+
+.mt-25 {
+  margin-top: 25px; }
+
+.mt-30 {
+  margin-top: 30px; }
+
+.mt-35 {
+  margin-top: 35px; }
+
+.mt-40 {
+  margin-top: 40px; }
+
+.mt-45 {
+  margin-top: 45px; }
+
+.mt-50 {
+  margin-top: 50px; }
+
+  .mb-5 {
+    margin-bottom: 5px; }
+
+  .mb-10 {
+    margin-bottom: 10px; }
+
+  .mb-15 {
+    margin-bottom: 15px; }
+
+  .mb-20 {
+    margin-bottom: 20px; }
+
+  .mb-25 {
+    margin-bottom: 25px; }
+
+  .mb-30 {
+    margin-bottom: 30px; }
+
+  .mb-35 {
+    margin-bottom: 35px; }
+
+  .mb-40 {
+    margin-bottom: 40px; }
+
+  .mb-45 {
+    margin-bottom: 45px; }
+
+  .mb-50 {
+    margin-bottom: 50px; }
+
+/*#logo {
+  width:69px;
+  height: 118px;
+  margin-bottom: 2rem;
+}*/
+
+
+  #logo{
+    height:177px;
+    margin-bottom: 3rem;
+  }
+.lead{font-size: 20px}
+
+#check-mark {
+  color: #3ecb7f
+}
+@media (min-width:768px){
+.max-width{
+  width:80%;
+}
+}
+.fa-ul{
+  margin-left: 1.5em;
+}
+
+.fa-exclamation-triangle, #error {color:red}
+.fa-exclamation-triangle:before {
+  padding-top: 4px;
+}
+.input-group-addon{
+  color:white;
+  background-color: #3ecb7f;
+  cursor: default;
+}
+
+#request{
+  cursor: pointer
+}
+
+.faucet-info{
+  padding: 10px;
+  background-color: #222;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  word-wrap: break-word;
+}
+.faucet-info >div:first-child{
+  margin-bottom: 10px;
+}
+.faucet-info label{
+  width: 100px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.faucet-info .unit{
+  margin-left: 5px;
+  color: #00db7e
+}
+
+.link{
+  color: #96e8fa;
+}
+.link:hover{
+  color: #96e8fa;
+}
