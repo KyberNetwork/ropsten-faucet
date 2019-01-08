@@ -2,82 +2,33 @@ package blockchain
 
 import (
 	"context"
+	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/KyberNetwork/reserve-data/common"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	ethereum "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/rpc"
 	"math/big"
 )
 
-type tbindex struct {
-	BulkIndex   uint64
-	IndexInBulk uint64
-}
-
 type Blockchain struct {
-	rpcClient    *rpc.Client
-	client       *ethclient.Client
-	wrapper      *ContractWrapper
-	pricing      *Pricing
-	reserve      *ReserveContract
-	rm           ethereum.Address
-	pricingAddr  ethereum.Address
-	signer       Signer
-	tokens       []common.Token
-	tokenIndices map[string]tbindex
-	nonce        NonceCorpus
+	client  *ethclient.Client
+	wrapper *ContractWrapper
+	reserve *ReserveContract
+	rm      ethereum.Address
+	signer  Signer
+	tokens  []common.Token
+	nonce   NonceCorpus
 }
 
 func (self *Blockchain) AddToken(t common.Token) {
 	self.tokens = append(self.tokens, t)
 }
 
-func (self *Blockchain) LoadAndSetTokenIndices() error {
-	tokens := []ethereum.Address{}
-	for _, tok := range self.tokens {
-		tokens = append(tokens, ethereum.HexToAddress(tok.Address))
-	}
-	bulkIndices, indicesInBulk, err := self.wrapper.GetTokenIndicies(
-		nil,
-		self.pricingAddr,
-		tokens,
-	)
-	if err != nil {
-		return err
-	}
-	self.tokenIndices = map[string]tbindex{}
-
-	for i, tok := range tokens {
-		self.tokenIndices[tok.Hex()] = tbindex{
-			bulkIndices[i].Uint64(),
-			indicesInBulk[i].Uint64(),
-		}
-	}
-	log.Printf("Token indices: %+v", self.tokenIndices)
-	return nil
-}
-
-func (self *Blockchain) CurrentBlock() (uint64, error) {
-	var blockno string
-	err := self.rpcClient.Call(&blockno, "eth_blockNumber")
-	if err != nil {
-		return 0, err
-	}
-	result, err := strconv.ParseUint(blockno, 0, 64)
-	return result, err
-}
-
 func (self *Blockchain) IsMined(tx ethereum.Hash) (bool, error) {
 	option := context.Background()
 	receipt, err := self.client.TransactionReceipt(option, tx)
-	if receipt != nil {
-		err = nil
-	}
 	return receipt != nil, err
 }
 
@@ -132,16 +83,26 @@ func (self *Blockchain) FetchBalanceData(reserve ethereum.Address, timepoint uin
 	return result, nil
 }
 
-func (self *Blockchain) FetchRates(timepoint uint64) (common.AllRateEntry, error) {
+func (self *Blockchain) FetchRates(
+	sources []common.Token,
+	dests []common.Token, timepoint uint64) (common.AllRateEntry, error) {
+
 	result := common.AllRateEntry{}
-	tokenAddrs := []ethereum.Address{}
-	for _, s := range self.tokens {
-		tokenAddrs = append(tokenAddrs, ethereum.HexToAddress(s.Address))
+	sourceAddrs := []ethereum.Address{}
+	for _, s := range sources {
+		sourceAddrs = append(sourceAddrs, ethereum.HexToAddress(s.Address))
+	}
+	destAddrs := []ethereum.Address{}
+	for _, d := range dests {
+		destAddrs = append(destAddrs, ethereum.HexToAddress(d.Address))
 	}
 	timestamp := common.GetTimestamp()
-	baseBuys, baseSells, compactBuys, compactSells, blocks, err := self.wrapper.GetTokenRates(
-		nil, self.pricingAddr, tokenAddrs,
-	)
+	rates, expiries, balances, err := self.wrapper.GetPrices(
+		nil, self.rm, sourceAddrs, destAddrs)
+	// fmt.Printf("\nrates (%d): %v\n", len(rates), rates)
+	// fmt.Printf("expiries: %v\n", expiries)
+	// fmt.Printf("balances: %v\n", balances)
+	// fmt.Printf("error: %s\n", err)
 	returnTime := common.GetTimestamp()
 	result.Timestamp = timestamp
 	result.ReturnTime = returnTime
@@ -151,90 +112,34 @@ func (self *Blockchain) FetchRates(timepoint uint64) (common.AllRateEntry, error
 		return result, err
 	} else {
 		result.Valid = true
-		result.Data = map[string]common.RateEntry{}
-		for i, token := range self.tokens {
-			result.Data[token.ID] = common.RateEntry{
-				baseBuys[i],
-				int8(compactBuys[i]),
-				baseSells[i],
-				int8(compactSells[i]),
-				blocks[i].Uint64(),
+		result.Data = map[common.TokenPairID]common.RateEntry{}
+		for i, s := range sources {
+			result.Data[common.NewTokenPairID(
+				s.ID, dests[i].ID)] = common.RateEntry{
+				rates[i], expiries[i], balances[i],
+				// rates[3*i], rates[3*i+1], rates[3*i+2],
 			}
 		}
 		return result, nil
 	}
 }
 
-func (self *Blockchain) GetPrice(token ethereum.Address, block *big.Int, priceType string, qty *big.Int) (*big.Int, error) {
-	if priceType == "buy" {
-		return self.pricing.GetPrice(nil, token, block, true, qty)
-	} else {
-		return self.pricing.GetPrice(nil, token, block, false, qty)
-	}
-}
-
 func (self *Blockchain) SetRates(
-	tokens []ethereum.Address,
-	buys []*big.Int,
-	sells []*big.Int,
-	block *big.Int) (ethereum.Hash, error) {
+	sources []ethereum.Address,
+	dests []ethereum.Address,
+	rates []*big.Int,
+	expiryBlocks []*big.Int) (ethereum.Hash, error) {
 
 	opts, err := self.getTransactOpts()
-	block.Add(block, big.NewInt(1))
 	if err != nil {
-		log.Printf("Getting transaction opts failed!!!!!!!\n")
+		fmt.Printf("Getting transaction opts failed!!!!!!!\n")
 		return ethereum.Hash{}, err
 	} else {
-		baseBuys, baseSells, compactBuys, compactSells, _, err := self.wrapper.GetTokenRates(
-			nil, self.pricingAddr, tokens,
-		)
+		tx, err := self.reserve.SetRate(
+			opts,
+			sources, dests, rates, expiryBlocks, true)
 		if err != nil {
-			return ethereum.Hash{}, err
-		}
-		baseTokens := []ethereum.Address{}
-		newBSells := []*big.Int{}
-		newBBuys := []*big.Int{}
-		newCSells := map[ethereum.Address]byte{}
-		newCBuys := map[ethereum.Address]byte{}
-		for i, token := range tokens {
-			compactSell, overflow1 := BigIntToCompactRate(sells[i], baseSells[i])
-			compactBuy, overflow2 := BigIntToCompactRate(buys[i], baseBuys[i])
-			if overflow1 || overflow2 {
-				baseTokens = append(baseTokens, token)
-				newBSells = append(newBSells, compactSell.Base)
-				newBBuys = append(newBBuys, compactBuy.Base)
-			} else {
-				if compactSell.Compact != byte(compactSells[i]) ||
-					compactBuy.Compact != byte(compactBuys[i]) {
-					newCSells[token] = compactSell.Compact
-					newCBuys[token] = compactBuy.Compact
-				}
-			}
-		}
-		buys, sells, indices := BuildCompactBulk(
-			newCBuys,
-			newCSells,
-			self.tokenIndices,
-		)
-		var tx *types.Transaction
-		if len(baseTokens) > 0 {
-			// set base tx
-			tx, err = self.pricing.SetBasePrice(
-				opts, baseTokens, newBBuys, newBSells,
-				buys, sells, block, indices)
-			log.Printf("Setting base rates: tx(%s), err(%v) with baseTokens(%+v), basebuys(%+v), basesells(%+v), buys(%+v), sells(%+v), block(%s), indices(%+v)",
-				tx.Hash().Hex(), err, baseTokens, newBBuys, newBSells, buys, sells, block.Text(10), indices,
-			)
-		} else {
-			// update compact tx
-			tx, err = self.pricing.SetCompactData(
-				opts, buys, sells, block, indices)
-			log.Printf("Setting compact rates: tx(%s), err(%v) with basesells(%+v), buys(%+v), sells(%+v), block(%s), indices(%+v)",
-				tx.Hash().Hex(), err, baseTokens, buys, sells, block.Text(10), indices,
-			)
-		}
-		if err != nil {
-			log.Printf("Broadcasting transaction failed!!!!!!!\n")
+			fmt.Printf("Broadcasting transaction failed!!!!!!!\n")
 			return ethereum.Hash{}, err
 		} else {
 			return tx.Hash(), err
@@ -309,9 +214,8 @@ func (self *Blockchain) Send(
 // }
 
 func NewBlockchain(
-	client *rpc.Client,
 	ethereum *ethclient.Client,
-	wrapperAddr, pricingAddr, reserveAddr ethereum.Address,
+	wrapperAddr, reserveAddr ethereum.Address,
 	signer Signer, nonceCorpus NonceCorpus) (*Blockchain, error) {
 	wrapper, err := NewContractWrapper(wrapperAddr, ethereum)
 	if err != nil {
@@ -323,21 +227,13 @@ func NewBlockchain(
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("pricing address: %s", pricingAddr.Hex())
-	pricing, err := NewPricing(pricingAddr, ethereum)
-	if err != nil {
-		return nil, err
-	}
 	return &Blockchain{
-		rpcClient:   client,
-		client:      ethereum,
-		wrapper:     wrapper,
-		pricing:     pricing,
-		reserve:     reserve,
-		rm:          reserveAddr,
-		pricingAddr: pricingAddr,
-		signer:      signer,
-		tokens:      []common.Token{},
-		nonce:       nonceCorpus,
+		client:  ethereum,
+		wrapper: wrapper,
+		reserve: reserve,
+		rm:      reserveAddr,
+		signer:  signer,
+		tokens:  []common.Token{},
+		nonce:   nonceCorpus,
 	}, nil
 }
