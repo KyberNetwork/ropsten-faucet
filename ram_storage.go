@@ -13,22 +13,26 @@ import (
 
 const FILE string = "storage.json"
 
+type pending struct {
+	Address ethereum.Address
+	User    int64
+}
+
 type RamStorage struct {
 	mu          sync.RWMutex
-	Pending     []*ethereum.Address
-	Registered  map[ethereum.Address]int
-	Sent        map[ethereum.Address]ethereum.Hash
+	Pending     []*pending
+	Registered  map[int64]int
+	Sent        map[int64]ethereum.Hash
 	LatestIndex int
 	Counter     int
 }
 
 func NewRamStorage() *RamStorage {
-
 	result := &RamStorage{
 		sync.RWMutex{},
-		[]*ethereum.Address{},
-		map[ethereum.Address]int{},
-		map[ethereum.Address]ethereum.Hash{},
+		[]*pending{},
+		map[int64]int{},
+		map[int64]ethereum.Hash{},
 		0,
 		0,
 	}
@@ -72,49 +76,52 @@ func (self *RamStorage) Persist() {
 	}
 }
 
-func (self *RamStorage) Get(addr ethereum.Address) (ethereum.Hash, bool) {
+func (self *RamStorage) Get(user int64) (ethereum.Hash, bool) {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
-	hash, found := self.Sent[addr]
+	hash, found := self.Sent[user]
 	return hash, found
 }
 
-func (self *RamStorage) Update(addr ethereum.Address, hash ethereum.Hash) error {
+func (self *RamStorage) Update(user int64, hash ethereum.Hash) error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	self.Sent[addr] = hash
+	self.Sent[user] = hash
 	return nil
 }
 
-func (self *RamStorage) AddAddress(addr ethereum.Address) (int, bool) {
+func (self *RamStorage) AddAddress(addr ethereum.Address, user int64) (int, bool) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	if _, found := self.Registered[addr]; found {
+	if _, found := self.Registered[user]; found {
 		return 0, false
 	} else {
-		self.Pending = append(self.Pending, &addr)
-		self.Registered[addr] = self.LatestIndex
+		self.Pending = append(self.Pending, &pending{
+			Address: addr,
+			User:    user,
+		})
+		self.Registered[user] = self.LatestIndex
 		self.LatestIndex += 1
 		return len(self.Pending) - 1, true
 	}
 }
 
-func (self *RamStorage) GetNextAddress() (ethereum.Address, error) {
+func (self *RamStorage) GetNextAddress() (ethereum.Address, int64, error) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	if len(self.Pending) == 0 {
-		return ethereum.Address{}, errors.New("no pending addr left")
+		return ethereum.Address{}, 0, errors.New("no pending addr left")
 	} else {
 		result := *self.Pending[0]
 		self.Pending[0] = nil
 		self.Pending = self.Pending[1:]
-		self.Counter = self.Registered[result]
-		return result, nil
+		self.Counter = self.Registered[result.User]
+		return result.Address, result.User, nil
 	}
 }
 
-func (self *RamStorage) Search(addr ethereum.Address) (int, int, error) {
+func (self *RamStorage) Search(user int64) (int, int, error) {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
-	return self.Counter, self.Registered[addr], nil
+	return self.Counter, self.Registered[user], nil
 }

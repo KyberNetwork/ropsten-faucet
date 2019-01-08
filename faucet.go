@@ -27,38 +27,38 @@ type FaucetApp struct {
 func (self *FaucetApp) Run() {
 	c := time.Tick(500 * time.Millisecond)
 	for _ = range c {
-		addr, err := self.storage.GetNextAddress()
+		addr, user, err := self.storage.GetNextAddress()
 		if err == nil {
-			tx, err := self.SendETH(addr)
+			tx, err := self.SendETH(addr, user)
 			fmt.Printf("Tx: %s, err: %v\n", tx.Hex(), err)
 		}
 	}
 }
 
-func (self *FaucetApp) Get(addr ethereum.Address) (ethereum.Hash, bool) {
-	return self.storage.Get(addr)
+func (self *FaucetApp) Get(user int64) (ethereum.Hash, bool) {
+	return self.storage.Get(user)
 }
 
-func (self *FaucetApp) Update(addr ethereum.Address, hash ethereum.Hash) error {
-	return self.storage.Update(addr, hash)
+func (self *FaucetApp) Update(user int64, hash ethereum.Hash) error {
+	return self.storage.Update(user, hash)
 }
 
-func (self *FaucetApp) AddAddress(addr ethereum.Address) (int, bool) {
-	return self.storage.AddAddress(addr)
+func (self *FaucetApp) AddAddress(addr ethereum.Address, user int64) (int, bool) {
+	return self.storage.AddAddress(addr, user)
 }
 
-func (self *FaucetApp) Search(addr ethereum.Address) (int, int, error) {
-	return self.storage.Search(addr)
+func (self *FaucetApp) Search(user int64) (int, int, error) {
+	return self.storage.Search(user)
 }
 
-func (self *FaucetApp) SendETH(addr ethereum.Address) (ethereum.Hash, error) {
+func (self *FaucetApp) SendETH(addr ethereum.Address, user int64) (ethereum.Hash, error) {
 	option := context.Background()
 	amount := big.NewInt(1000000000000000000)
 	nonce, err := self.nonce.GetNextNonce()
 	if err != nil {
 		return ethereum.Hash{}, err
 	}
-	gasLimit := big.NewInt(50000)
+	gasLimit := uint64(50000)
 	gasPrice := big.NewInt(30000000000)
 	rawTx := types.NewTransaction(
 		nonce.Uint64(), addr, amount, gasLimit, gasPrice, []byte{})
@@ -69,7 +69,7 @@ func (self *FaucetApp) SendETH(addr ethereum.Address) (ethereum.Hash, error) {
 	if err = self.ethclient.SendTransaction(option, signedTx); err != nil {
 		return ethereum.Hash{}, err
 	}
-	self.storage.Update(addr, signedTx.Hash())
+	self.storage.Update(user, signedTx.Hash())
 	return signedTx.Hash(), nil
 }
 
