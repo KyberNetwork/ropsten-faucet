@@ -72,6 +72,7 @@ function submitAddress(address) {
         $("#error").hide()
         $("#success").html(response.msg)
         $("#success").show();
+        $(".request-group").hide()
       } else {
         if (response.tx) {
           var viewTx = $("<a target='_blank' class='link'>View on etherscan</a>")
