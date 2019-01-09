@@ -38,27 +38,42 @@
           </div>
         </div>
       </div>
-      <div class="row">
-        <div class="col-md-8 col-xs-12 mx-auto">
-          <p class="lead mb-10">Request faucet for 1 ETH</p>
-          <div class="input-group">
-            <input type="text" id="user_address" class="form-control" placeholder="Your address" aria-describedby="user-address">
-            <span class="input-group-addon" id="request">Request</span>
+      <div id="faucet" style="display: none;">
+        <div class="row">
+          <div class="col-md-8 col-xs-12 mx-auto align-self-center" style="margin:0 auto">
+            <p class="lead mb-12"">Welcome <span id="user_name"></span></p>
           </div>
-          <!--
-               <div class="search">
-                  <input type="text" id="user_address" class="searchTerm" placeholder="Your address">
-                  <button type="submit" class="searchButton"  onclick="checkAddress()">
-                    Check
-                 </button>
-              </div> -->
-          <ul class="fa-ul text-left mt-3">
-            <li id="error" class="error" style="display: none;">
-              <i class="fa-li fa fa-exclamation-triangle"></i>Invalid address. Address should start with 0x, followed by exactly 40 hex digits</li>
-            <li id="success" class="success" style="display: none;">Your address has been added to queue successfully</li>
-          </ul>
         </div>
+        <div class="row">
+          <div class="col-md-8 col-xs-12 mx-auto" >
+            <p class="lead mb-10 request-group">Request faucet for 1 ETH</p>
+            <div class="input-group request-group">
+              <input type="text" id="user_address" class="form-control" placeholder="Your address" aria-describedby="user-address">
+              <span class="input-group-addon" id="request">Request</span>
+            </div>
+            <!--
+                <div class="search">
+                    <input type="text" id="user_address" class="searchTerm" placeholder="Your address">
+                    <button type="submit" class="searchButton"  onclick="checkAddress()">
+                      Check
+                  </button>
+                </div> -->
+            <ul class="fa-ul text-left mt-3">
+              <li id="error" class="error" style="display: none;">
+                <i class="fa-li fa fa-exclamation-triangle"></i>Invalid address. Address should start with 0x, followed by exactly 40 hex digits</li>
+              <li id="success" class="success" style="display: none;">Your address has been added to queue successfully</li>
+            </ul>
+          </div>
 
+        </div>
+      </div>
+
+      <div class="row" id="sign-in" style="display: none;">
+        <div class="col-md-8 col-xs-12 mx-auto" >
+          <span class="col-6 col-md-4 align-self-center input-group-addon" style="margin:0 auto">
+            <a class="text-white" href="https://faucet-backend.kyber.network/sign-in"> Sign in with github </a>
+          </span>
+        </div>
       </div>
 
       <!-- <div class="row">

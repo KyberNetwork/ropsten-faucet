@@ -115,7 +115,7 @@ func (self *FaucetServer) Claim(c *gin.Context) {
 				http.StatusOK,
 				gin.H{
 					"success": false,
-					"error":   fmt.Sprintf("Your address is already registered. We have sent ETH to your address with tx: %s", sent.Hex()),
+					"error":   fmt.Sprintf("Your account is already registered. We have sent ETH to your account with tx: %s", sent.Hex()),
 					"tx":      sent.Hex(),
 				},
 			)
@@ -127,12 +127,12 @@ func (self *FaucetServer) Claim(c *gin.Context) {
 					http.StatusOK,
 					gin.H{
 						"success": false,
-						"error":   fmt.Sprintf("Your address is already registered. If you haven't receive the ETH yet, please wait, there are %d addresses before yours.", yourIndex-latestIndex)},
+						"error":   fmt.Sprintf("Your account is already registered. If you haven't receive the ETH yet, please wait, there are %d accounts before yours.", yourIndex-latestIndex)},
 				)
 			} else {
 				c.JSON(
 					http.StatusOK,
-					gin.H{"success": true, "msg": fmt.Sprintf("Your address is added to faucet queue. There are %d addresses before yours. Please wait.", no)},
+					gin.H{"success": true, "msg": fmt.Sprintf("Your account is added to faucet queue. There are %d accounts before yours. Please wait.", no)},
 				)
 			}
 		}
@@ -159,16 +159,29 @@ func (self *FaucetServer) CallBack(c *gin.Context) {
 }
 
 func (self *FaucetServer) UserInfo(c *gin.Context) {
+	if !self.RateGuard(c) {
+		return
+	}
 	user, err := self.GetUser(c)
 	if err != nil {
 		c.JSON(
 			http.StatusOK,
 			gin.H{
 				"success": false,
-				"error":   err,
+				"error":   err.Error(),
 			},
 		)
 		return
+	}
+	var (
+		msg string
+		tx  string
+	)
+	userID := *user.ID
+	sent, found := self.app.Get(userID)
+	if found {
+		msg = fmt.Sprintf("Your account is already registered. We have sent ETH to your account with tx: %s", sent.Hex())
+		tx = sent.Hex()
 	}
 	c.JSON(
 		http.StatusOK,
@@ -177,6 +190,8 @@ func (self *FaucetServer) UserInfo(c *gin.Context) {
 			"user":       user.Login,
 			"id":         user.ID,
 			"avatar_url": user.AvatarURL,
+			"msg":        msg,
+			"tx":         tx,
 		},
 	)
 }

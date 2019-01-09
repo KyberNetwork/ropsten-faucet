@@ -1,7 +1,9 @@
 
 $(document).ready(function () {
   //calcualte balance
+  $("#sign-in").hide()
   var ethAdd = $("#faucet-address").html()
+  getUserInfo()
   getBalance(ethAdd)
 
   $("#request").on("click", function () {
@@ -16,15 +18,42 @@ $(document).ready(function () {
   })
 })
 
-function getBalance(address){
+function getBalance(address) {
   $.ajax({
-    url: "https://ropsten.etherscan.io/api?module=account&action=balance&address="+address+"&tag=latest",
-    type:"GET",
+    url: "https://ropsten.etherscan.io/api?module=account&action=balance&address=" + address + "&tag=latest",
+    type: "GET",
     success: function (response) {
       var balance = response.result
-      var wei = Math.pow(10,18)
-      var balanceEth = balance/wei
-     $("#balance").html(balanceEth)
+      var wei = Math.pow(10, 18)
+      var balanceEth = balance / wei
+      $("#balance").html(balanceEth)
+    }
+  })
+}
+
+function getUserInfo() {
+  $.ajax({
+    url: "https://faucet-backend.kyber.network/user-info",
+    type: "GET",
+    success: function (response) {
+      console.log(response)
+      if (response.success === false) {
+        $("#sign-in").show()
+      }
+      else {
+        $("#user_name").html(response.user)
+        if (response.tx !== "") {
+          var viewTx = $("<a target='_blank' class='link'>View on etherscan</a>")
+          viewTx.attr("href", "https://ropsten.etherscan.io/tx/" + response.tx)
+          $("#error").html(response.msg)
+          $("#error").append($("<br>"))
+          $("#error").append(viewTx)
+          $(".request-group").hide()
+          $("#error").show()
+          $("#success").hide();
+        }
+        $("#faucet").show()
+      }
     }
   })
 }
@@ -33,23 +62,23 @@ function submitAddress(address) {
   console.log(address)
   $.ajax({
     url: "https://faucet-backend.kyber.network/claim-eth",
-    type:"POST",
+    type: "POST",
     data: { address: address },
     success: function (response) {
-     // var response = JSON.parse(result)
-      if(response.success){
+      // var response = JSON.parse(result)
+      if (response.success) {
         $("#error").hide()
         $("#success").html(response.msg)
         $("#success").show();
-      }else{
-        if(response.tx){
+      } else {
+        if (response.tx) {
           var viewTx = $("<a target='_blank' class='link'>View on etherscan</a>")
-          viewTx.attr("href","https://ropsten.etherscan.io/tx/"+response.tx)
+          viewTx.attr("href", "https://ropsten.etherscan.io/tx/" + response.tx)
           $("#error").html(response.error)
           $("#error").append($("<br>"))
           $("#error").append(viewTx)
-        }else{
-          var error = response.error?response.error:"Cannot request faucet, Please try at another momment!"
+        } else {
+          var error = response.error ? response.error : "Cannot request faucet, Please try at another momment!"
           $("#error").html(error)
         }
         $("#error").show()
@@ -90,13 +119,13 @@ var isAddress = function (address) {
 */
 var isChecksumAddress = function (address) {
   // Check each case
-  address = address.replace('0x','');
+  address = address.replace('0x', '');
   var addressHash = sha3(address.toLowerCase());
-  for (var i = 0; i < 40; i++ ) {
-      // the nth letter should be uppercase if the nth digit of casemap is 1
-      if ((parseInt(addressHash[i], 16) > 7 && address[i].toUpperCase() !== address[i]) || (parseInt(addressHash[i], 16) <= 7 && address[i].toLowerCase() !== address[i])) {
-          return false;
-      }
+  for (var i = 0; i < 40; i++) {
+    // the nth letter should be uppercase if the nth digit of casemap is 1
+    if ((parseInt(addressHash[i], 16) > 7 && address[i].toUpperCase() !== address[i]) || (parseInt(addressHash[i], 16) <= 7 && address[i].toLowerCase() !== address[i])) {
+      return false;
+    }
   }
   return true;
 };
