@@ -14,7 +14,7 @@ install: true
 
 after_success:
   - docker --version
-  - docker build -f Dockerfile.next -t kybernetwork/ropsten-faucet:$TRAVIS_COMMIT .
+  - docker build -f Dockerfile -t kybernetwork/ropsten-faucet:$TRAVIS_COMMIT .
 
 deploy:
   - provider: script
