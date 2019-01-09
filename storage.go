@@ -10,4 +10,5 @@ type Storage interface {
 	Search(user int64) (int, int, error)
 	Get(user int64) (ethereum.Hash, bool)
 	Update(user int64, hash ethereum.Hash) error
+	IsRegisted(user int64) bool
 }

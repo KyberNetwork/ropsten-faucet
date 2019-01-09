@@ -182,6 +182,12 @@ func (self *FaucetServer) UserInfo(c *gin.Context) {
 	if found {
 		msg = fmt.Sprintf("Your account is already registered. We have sent ETH to your account with tx: %s", sent.Hex())
 		tx = sent.Hex()
+	} else {
+		isRegisted := self.app.IsRegisted(userID)
+		if isRegisted {
+			latestIndex, yourIndex, _ := self.app.Search(userID)
+			msg = fmt.Sprintf("Your account is already registered. If you haven't receive the ETH yet, please wait, there are %d accounts before yours.", yourIndex-latestIndex)
+		}
 	}
 	c.JSON(
 		http.StatusOK,

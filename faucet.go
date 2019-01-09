@@ -51,6 +51,10 @@ func (self *FaucetApp) Search(user int64) (int, int, error) {
 	return self.storage.Search(user)
 }
 
+func (self *FaucetApp) IsRegisted(user int64) bool {
+	return self.storage.IsRegisted(user)
+}
+
 func (self *FaucetApp) SendETH(addr ethereum.Address, user int64) (ethereum.Hash, error) {
 	option := context.Background()
 	amount := big.NewInt(1000000000000000000)

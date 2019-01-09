@@ -42,15 +42,17 @@ function getUserInfo() {
       }
       else {
         $("#user_name").html(response.user)
+        if (response.msg != "") {
+          $("#error").html(response.msg)
+          $("#error").show()
+          $("#success").hide();
+          $(".request-group").hide()
+        }
         if (response.tx !== "") {
           var viewTx = $("<a target='_blank' class='link'>View on etherscan</a>")
           viewTx.attr("href", "https://ropsten.etherscan.io/tx/" + response.tx)
-          $("#error").html(response.msg)
           $("#error").append($("<br>"))
           $("#error").append(viewTx)
-          $(".request-group").hide()
-          $("#error").show()
-          $("#success").hide();
         }
         $("#faucet").show()
       }

@@ -125,3 +125,10 @@ func (self *RamStorage) Search(user int64) (int, int, error) {
 	defer self.mu.RUnlock()
 	return self.Counter, self.Registered[user], nil
 }
+
+func (self *RamStorage) IsRegisted(user int64) bool {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	_, found := self.Registered[user]
+	return found
+}
