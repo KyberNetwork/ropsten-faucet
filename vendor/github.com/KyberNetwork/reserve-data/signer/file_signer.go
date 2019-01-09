@@ -25,7 +25,6 @@ type FileSigner struct {
 	BitfinexSecret string `json:"bitfinex_secret"`
 	Keystore       string `json:"keystore_path"`
 	Passphrase     string `json:"passphrase"`
-	KNSecret       string `json:"kn_secret"`
 	opts           *bind.TransactOpts
 }
 
@@ -55,12 +54,6 @@ func (self FileSigner) GetBittrexKey() string {
 
 func (self FileSigner) GetBinanceKey() string {
 	return self.BinanceKey
-}
-
-func (self FileSigner) KNSign(msg string) string {
-	mac := hmac.New(sha512.New, []byte(self.KNSecret))
-	mac.Write([]byte(msg))
-	return ethereum.Bytes2Hex(mac.Sum(nil))
 }
 
 func (self FileSigner) LiquiSign(msg string) string {
@@ -107,8 +100,8 @@ func NewFileSigner(file string) *FileSigner {
 		panic(err)
 	}
 
-	auth.GasLimit = big.NewInt(1000000)
-	auth.GasPrice = big.NewInt(35000000000)
+	auth.GasLimit = 1000000
+	auth.GasPrice = big.NewInt(60000000000)
 	signer.opts = auth
 	return &signer
 }

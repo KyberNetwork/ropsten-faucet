@@ -14,7 +14,7 @@ import (
 )
 
 // ContractWrapperABI is the input ABI used to generate the binding from.
-const ContractWrapperABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"ETH_TOKEN_ADDRESS\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"x\",\"type\":\"bytes14\"},{\"name\":\"byteInd\",\"type\":\"uint256\"}],\"name\":\"getInt8FromByte\",\"outputs\":[{\"name\":\"\",\"type\":\"int8\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"reserve\",\"type\":\"address\"},{\"name\":\"tokens\",\"type\":\"address[]\"}],\"name\":\"getBalances\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"pricingContract\",\"type\":\"address\"},{\"name\":\"tokenList\",\"type\":\"address[]\"}],\"name\":\"getTokenIndicies\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"},{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"x\",\"type\":\"bytes14\"},{\"name\":\"byteInd\",\"type\":\"uint256\"}],\"name\":\"getByteFromBytes14\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes1\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"pricingContract\",\"type\":\"address\"},{\"name\":\"tokenList\",\"type\":\"address[]\"}],\"name\":\"getTokenRates\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"},{\"name\":\"\",\"type\":\"uint256[]\"},{\"name\":\"\",\"type\":\"int8[]\"},{\"name\":\"\",\"type\":\"int8[]\"},{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
+const ContractWrapperABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"reserve\",\"type\":\"address\"},{\"name\":\"sources\",\"type\":\"address[]\"},{\"name\":\"dests\",\"type\":\"address[]\"}],\"name\":\"getPrices\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"},{\"name\":\"\",\"type\":\"uint256[]\"},{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"reserve\",\"type\":\"address\"},{\"name\":\"tokens\",\"type\":\"address[]\"}],\"name\":\"getBalances\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"type\":\"function\"}]"
 
 // ContractWrapper is an auto generated Go binding around an Ethereum contract.
 type ContractWrapper struct {
@@ -102,7 +102,7 @@ func bindContractWrapper(address common.Address, caller bind.ContractCaller, tra
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor), nil
+	return bind.NewBoundContract(address, parsed, caller, transactor, nil), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -143,32 +143,6 @@ func (_ContractWrapper *ContractWrapperTransactorRaw) Transact(opts *bind.Transa
 	return _ContractWrapper.Contract.contract.Transact(opts, method, params...)
 }
 
-// ETH_TOKEN_ADDRESS is a free data retrieval call binding the contract method 0x1878d1f1.
-//
-// Solidity: function ETH_TOKEN_ADDRESS() constant returns(address)
-func (_ContractWrapper *ContractWrapperCaller) ETH_TOKEN_ADDRESS(opts *bind.CallOpts) (common.Address, error) {
-	var (
-		ret0 = new(common.Address)
-	)
-	out := ret0
-	err := _ContractWrapper.contract.Call(opts, out, "ETH_TOKEN_ADDRESS")
-	return *ret0, err
-}
-
-// ETH_TOKEN_ADDRESS is a free data retrieval call binding the contract method 0x1878d1f1.
-//
-// Solidity: function ETH_TOKEN_ADDRESS() constant returns(address)
-func (_ContractWrapper *ContractWrapperSession) ETH_TOKEN_ADDRESS() (common.Address, error) {
-	return _ContractWrapper.Contract.ETH_TOKEN_ADDRESS(&_ContractWrapper.CallOpts)
-}
-
-// ETH_TOKEN_ADDRESS is a free data retrieval call binding the contract method 0x1878d1f1.
-//
-// Solidity: function ETH_TOKEN_ADDRESS() constant returns(address)
-func (_ContractWrapper *ContractWrapperCallerSession) ETH_TOKEN_ADDRESS() (common.Address, error) {
-	return _ContractWrapper.Contract.ETH_TOKEN_ADDRESS(&_ContractWrapper.CallOpts)
-}
-
 // GetBalances is a free data retrieval call binding the contract method 0x6a385ae9.
 //
 // Solidity: function getBalances(reserve address, tokens address[]) constant returns(uint256[])
@@ -195,120 +169,34 @@ func (_ContractWrapper *ContractWrapperCallerSession) GetBalances(reserve common
 	return _ContractWrapper.Contract.GetBalances(&_ContractWrapper.CallOpts, reserve, tokens)
 }
 
-// GetByteFromBytes14 is a free data retrieval call binding the contract method 0xa609f034.
+// GetPrices is a free data retrieval call binding the contract method 0x554d184b.
 //
-// Solidity: function getByteFromBytes14(x bytes14, byteInd uint256) constant returns(bytes1)
-func (_ContractWrapper *ContractWrapperCaller) GetByteFromBytes14(opts *bind.CallOpts, x [14]byte, byteInd *big.Int) ([1]byte, error) {
-	var (
-		ret0 = new([1]byte)
-	)
-	out := ret0
-	err := _ContractWrapper.contract.Call(opts, out, "getByteFromBytes14", x, byteInd)
-	return *ret0, err
-}
-
-// GetByteFromBytes14 is a free data retrieval call binding the contract method 0xa609f034.
-//
-// Solidity: function getByteFromBytes14(x bytes14, byteInd uint256) constant returns(bytes1)
-func (_ContractWrapper *ContractWrapperSession) GetByteFromBytes14(x [14]byte, byteInd *big.Int) ([1]byte, error) {
-	return _ContractWrapper.Contract.GetByteFromBytes14(&_ContractWrapper.CallOpts, x, byteInd)
-}
-
-// GetByteFromBytes14 is a free data retrieval call binding the contract method 0xa609f034.
-//
-// Solidity: function getByteFromBytes14(x bytes14, byteInd uint256) constant returns(bytes1)
-func (_ContractWrapper *ContractWrapperCallerSession) GetByteFromBytes14(x [14]byte, byteInd *big.Int) ([1]byte, error) {
-	return _ContractWrapper.Contract.GetByteFromBytes14(&_ContractWrapper.CallOpts, x, byteInd)
-}
-
-// GetInt8FromByte is a free data retrieval call binding the contract method 0x67c33c80.
-//
-// Solidity: function getInt8FromByte(x bytes14, byteInd uint256) constant returns(int8)
-func (_ContractWrapper *ContractWrapperCaller) GetInt8FromByte(opts *bind.CallOpts, x [14]byte, byteInd *big.Int) (int8, error) {
-	var (
-		ret0 = new(int8)
-	)
-	out := ret0
-	err := _ContractWrapper.contract.Call(opts, out, "getInt8FromByte", x, byteInd)
-	return *ret0, err
-}
-
-// GetInt8FromByte is a free data retrieval call binding the contract method 0x67c33c80.
-//
-// Solidity: function getInt8FromByte(x bytes14, byteInd uint256) constant returns(int8)
-func (_ContractWrapper *ContractWrapperSession) GetInt8FromByte(x [14]byte, byteInd *big.Int) (int8, error) {
-	return _ContractWrapper.Contract.GetInt8FromByte(&_ContractWrapper.CallOpts, x, byteInd)
-}
-
-// GetInt8FromByte is a free data retrieval call binding the contract method 0x67c33c80.
-//
-// Solidity: function getInt8FromByte(x bytes14, byteInd uint256) constant returns(int8)
-func (_ContractWrapper *ContractWrapperCallerSession) GetInt8FromByte(x [14]byte, byteInd *big.Int) (int8, error) {
-	return _ContractWrapper.Contract.GetInt8FromByte(&_ContractWrapper.CallOpts, x, byteInd)
-}
-
-// GetTokenIndicies is a free data retrieval call binding the contract method 0x7c80feff.
-//
-// Solidity: function getTokenIndicies(pricingContract address, tokenList address[]) constant returns(uint256[], uint256[])
-func (_ContractWrapper *ContractWrapperCaller) GetTokenIndicies(opts *bind.CallOpts, pricingContract common.Address, tokenList []common.Address) ([]*big.Int, []*big.Int, error) {
+// Solidity: function getPrices(reserve address, sources address[], dests address[]) constant returns(uint256[], uint256[], uint256[])
+func (_ContractWrapper *ContractWrapperCaller) GetPrices(opts *bind.CallOpts, reserve common.Address, sources []common.Address, dests []common.Address) ([]*big.Int, []*big.Int, []*big.Int, error) {
 	var (
 		ret0 = new([]*big.Int)
 		ret1 = new([]*big.Int)
-	)
-	out := &[]interface{}{
-		ret0,
-		ret1,
-	}
-	err := _ContractWrapper.contract.Call(opts, out, "getTokenIndicies", pricingContract, tokenList)
-	return *ret0, *ret1, err
-}
-
-// GetTokenIndicies is a free data retrieval call binding the contract method 0x7c80feff.
-//
-// Solidity: function getTokenIndicies(pricingContract address, tokenList address[]) constant returns(uint256[], uint256[])
-func (_ContractWrapper *ContractWrapperSession) GetTokenIndicies(pricingContract common.Address, tokenList []common.Address) ([]*big.Int, []*big.Int, error) {
-	return _ContractWrapper.Contract.GetTokenIndicies(&_ContractWrapper.CallOpts, pricingContract, tokenList)
-}
-
-// GetTokenIndicies is a free data retrieval call binding the contract method 0x7c80feff.
-//
-// Solidity: function getTokenIndicies(pricingContract address, tokenList address[]) constant returns(uint256[], uint256[])
-func (_ContractWrapper *ContractWrapperCallerSession) GetTokenIndicies(pricingContract common.Address, tokenList []common.Address) ([]*big.Int, []*big.Int, error) {
-	return _ContractWrapper.Contract.GetTokenIndicies(&_ContractWrapper.CallOpts, pricingContract, tokenList)
-}
-
-// GetTokenRates is a free data retrieval call binding the contract method 0xf37f8345.
-//
-// Solidity: function getTokenRates(pricingContract address, tokenList address[]) constant returns(uint256[], uint256[], int8[], int8[], uint256[])
-func (_ContractWrapper *ContractWrapperCaller) GetTokenRates(opts *bind.CallOpts, pricingContract common.Address, tokenList []common.Address) ([]*big.Int, []*big.Int, []int8, []int8, []*big.Int, error) {
-	var (
-		ret0 = new([]*big.Int)
-		ret1 = new([]*big.Int)
-		ret2 = new([]int8)
-		ret3 = new([]int8)
-		ret4 = new([]*big.Int)
+		ret2 = new([]*big.Int)
 	)
 	out := &[]interface{}{
 		ret0,
 		ret1,
 		ret2,
-		ret3,
-		ret4,
 	}
-	err := _ContractWrapper.contract.Call(opts, out, "getTokenRates", pricingContract, tokenList)
-	return *ret0, *ret1, *ret2, *ret3, *ret4, err
+	err := _ContractWrapper.contract.Call(opts, out, "getPrices", reserve, sources, dests)
+	return *ret0, *ret1, *ret2, err
 }
 
-// GetTokenRates is a free data retrieval call binding the contract method 0xf37f8345.
+// GetPrices is a free data retrieval call binding the contract method 0x554d184b.
 //
-// Solidity: function getTokenRates(pricingContract address, tokenList address[]) constant returns(uint256[], uint256[], int8[], int8[], uint256[])
-func (_ContractWrapper *ContractWrapperSession) GetTokenRates(pricingContract common.Address, tokenList []common.Address) ([]*big.Int, []*big.Int, []int8, []int8, []*big.Int, error) {
-	return _ContractWrapper.Contract.GetTokenRates(&_ContractWrapper.CallOpts, pricingContract, tokenList)
+// Solidity: function getPrices(reserve address, sources address[], dests address[]) constant returns(uint256[], uint256[], uint256[])
+func (_ContractWrapper *ContractWrapperSession) GetPrices(reserve common.Address, sources []common.Address, dests []common.Address) ([]*big.Int, []*big.Int, []*big.Int, error) {
+	return _ContractWrapper.Contract.GetPrices(&_ContractWrapper.CallOpts, reserve, sources, dests)
 }
 
-// GetTokenRates is a free data retrieval call binding the contract method 0xf37f8345.
+// GetPrices is a free data retrieval call binding the contract method 0x554d184b.
 //
-// Solidity: function getTokenRates(pricingContract address, tokenList address[]) constant returns(uint256[], uint256[], int8[], int8[], uint256[])
-func (_ContractWrapper *ContractWrapperCallerSession) GetTokenRates(pricingContract common.Address, tokenList []common.Address) ([]*big.Int, []*big.Int, []int8, []int8, []*big.Int, error) {
-	return _ContractWrapper.Contract.GetTokenRates(&_ContractWrapper.CallOpts, pricingContract, tokenList)
+// Solidity: function getPrices(reserve address, sources address[], dests address[]) constant returns(uint256[], uint256[], uint256[])
+func (_ContractWrapper *ContractWrapperCallerSession) GetPrices(reserve common.Address, sources []common.Address, dests []common.Address) ([]*big.Int, []*big.Int, []*big.Int, error) {
+	return _ContractWrapper.Contract.GetPrices(&_ContractWrapper.CallOpts, reserve, sources, dests)
 }

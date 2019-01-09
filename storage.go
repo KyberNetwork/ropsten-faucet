@@ -5,9 +5,10 @@ import (
 )
 
 type Storage interface {
-	AddAddress(addr ethereum.Address) (int, bool)
-	GetNextAddress() (ethereum.Address, error)
-	Search(addr ethereum.Address) (int, int, error)
-	Get(addr ethereum.Address) (ethereum.Hash, bool)
-	Update(addr ethereum.Address, hash ethereum.Hash) error
+	AddAddress(addr ethereum.Address, user int64) (int, bool)
+	GetNextAddress() (ethereum.Address, int64, error)
+	Search(user int64) (int, int, error)
+	Get(user int64) (ethereum.Hash, bool)
+	Update(user int64, hash ethereum.Hash) error
+	IsRegisted(user int64) bool
 }

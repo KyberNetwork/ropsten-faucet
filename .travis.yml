@@ -1,0 +1,23 @@
+sudo: required
+
+go_import_path: github.com/ductm54/ropsten-faucet
+
+language: go
+
+go:
+  - "1.11.x"
+
+services:
+  - docker
+
+install: true
+
+after_success:
+  - docker --version
+  - docker build -f Dockerfile -t kybernetwork/ropsten-faucet:$TRAVIS_COMMIT .
+
+deploy:
+  - provider: script
+    script: bash .travis/docker_push.sh
+    on:
+      all_branches: true
